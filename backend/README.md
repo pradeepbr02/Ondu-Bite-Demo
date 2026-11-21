@@ -131,7 +131,9 @@ All address, checkout and order endpoints require the bearer session. Address ID
 
 Address input: `name`, `phone`, `line1`, optional `line2`, `city`, `stateCode`, `postalCode`, and optional `country` (only `IN`). Phone accepts a 10-digit Indian mobile number or the same number prefixed with `+91`; the stored value uses `+91`. PIN/state validation is syntactic, not proof that a courier serves the address.
 
-Shipping is **5900 paise (₹59), free when item subtotal is at least 99900 paise (₹999)**. Totals are explicitly `pricingMode: DEMO`: prices are used as listed, with no additional tax or coupon calculation. Responses include `paymentAvailable: false` and `serviceability: UNVERIFIED`. Production startup disables new demo quotes and checkout creation with `503 CHECKOUT_NOT_READY`. Before enabling real purchases we must finalize tax treatment, integrate courier serviceability and payments, and replace this demo gate.
+Shipping is **5900 paise (₹59), free when item subtotal is at least 99900 paise (₹999)**. Totals are explicitly `pricingMode: DEMO`: prices are used as listed, with no additional tax calculation. Responses include `paymentAvailable: false` and `serviceability: UNVERIFIED`. Production startup disables new demo quotes and checkout creation with `503 CHECKOUT_NOT_READY` by default.
+
+To offer demo checkout on Render, keep `NODE_ENV=production`, set `DEMO_CHECKOUT_ENABLED=true` on the API service, and deploy. The API runs the reservation expiry loop itself whenever this flag is set, so the demo can run without a separate worker. It checks for expired holds as soon as it starts. If the API sleeps, cleanup resumes when it starts again. Each demo checkout holds stock in the configured database for up to 15 minutes under normal operation. Payments and fulfillment remain unavailable for unpaid demo orders.
 
 Using `$headers` from the login example above:
 
