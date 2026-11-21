@@ -1,0 +1,153 @@
+.store-assistant {
+  position: fixed;
+  z-index: 40;
+  inset-inline-end: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+}
+
+.assistant-launcher,
+.assistant-form button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid #d8b364;
+  background: #075b2d;
+  color: #fff9e9;
+  font-weight: 700;
+}
+
+.assistant-launcher {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  padding: 0;
+  box-shadow: 0 5px 20px #18352733;
+}
+
+.assistant-panel {
+  width: min(375px, calc(100vw - 36px));
+  max-height: min(560px, calc(100dvh - 106px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #d8b364;
+  border-radius: 16px;
+  background: #fff9eb;
+  box-shadow: 0 10px 34px #18352738;
+  font-size: 14px;
+}
+
+.assistant-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px 8px 16px;
+  background: linear-gradient(120deg, #143e32, #28664a);
+  color: #fff9e9;
+}
+.assistant-header h2 {
+  margin: 0 auto 0 0;
+  font-size: 17px;
+  letter-spacing: normal;
+  font-weight: 700;
+}
+.assistant-header button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+}
+.assistant-header button:hover {
+  background: #ffffff20;
+}
+.assistant-transcript {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 64px;
+  height: 252px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 14px;
+}
+.assistant-message {
+  align-self: start;
+  max-width: 92%;
+  margin: 0;
+  padding: 9px 12px;
+  border-radius: 11px 11px 11px 3px;
+  background: #e8efdf;
+  color: #253c2d;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.assistant-message.customer {
+  align-self: end;
+  border-radius: 11px 11px 3px 11px;
+  background: #f5e2b7;
+  color: #4a2e22;
+}
+.assistant-message a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  color: #075b2d;
+  font-weight: 700;
+  text-decoration: underline;
+}
+.assistant-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+  border-top: 1px solid #ede4ce;
+}
+.assistant-shortcuts > * {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 4px 9px;
+  border: 1px solid #c7d6b6;
+  border-radius: 7px;
+  background: #fffdf6;
+  color: #155639;
+  font-size: 12px;
+}
+.assistant-shortcuts > *:hover {
+  background: #eef3e6;
+}
+.assistant-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  gap: 7px;
+  padding: 5px 12px 12px;
+}
+.assistant-form input {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid #b7c5aa;
+  border-radius: 8px;
+  background: #fffdf6;
+  font-size: 16px;
+  color: #173b28;
+}
+.assistant-form button {
+  border-radius: 8px;
+}
+.store-assistant :focus-visible {
+  outline: 2px solid #a16e1a;
+  outline-offset: 2px;
+}
+.whatsapp-order {
+  margin-top: 10px;
+}

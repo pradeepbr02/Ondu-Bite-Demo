@@ -1,0 +1,172 @@
+/* Ondu Packet: colours sampled from the supplied logo. */
+:root {
+  --brand-green: #0c8a43;
+  --brand-yellow: #f3b718;
+  --brand-white: #fff;
+  --green-strong: #08783b;
+}
+::selection {
+  background: var(--brand-yellow);
+  color: #173b28;
+}
+.brand-light {
+  color: var(--brand-white);
+}
+.announcement {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--green-strong);
+  color: white;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .announcement::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: linear-gradient(108deg, transparent 35%, #fff0b826 50%, transparent 65%);
+    pointer-events: none;
+    animation: announcement-shine 1.4s ease-out 350ms both;
+  }
+}
+
+@keyframes announcement-shine {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+.button.primary {
+  background: linear-gradient(120deg, #08783b, #096b35);
+  color: white;
+}
+.button.primary:hover:not(:disabled) {
+  background: linear-gradient(120deg, #096b35, #075b2d);
+}
+.category-tabs a.selected {
+  background: var(--green-strong);
+  border-color: var(--green-strong);
+}
+.hero-sticker,
+.bag-count {
+  background: var(--brand-yellow);
+  border-color: #d6a012;
+  color: #173b28;
+}
+.closing-strip {
+  background: linear-gradient(110deg, var(--brand-green), var(--brand-yellow));
+  color: #075b2d;
+}
+.closing-strip > span {
+  background: #fffffff0;
+  border-radius: 7px;
+  padding: 10px 22px;
+  text-align: center;
+}
+.closing-strip > svg {
+  color: white;
+}
+.brand-story-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 0.65fr);
+  gap: 30px;
+  align-items: center;
+  background: linear-gradient(130deg, #e3f2e8, #fff3ce);
+}
+.brand-story-card h2 {
+  font-size: 36px;
+}
+.brand-reference {
+  position: relative;
+  aspect-ratio: 1;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--brand-green);
+}
+.brand-reference img {
+  object-fit: contain;
+}
+.brand-story-card p:last-of-type {
+  margin-bottom: 20px;
+}
+.eyebrow,
+.text-link {
+  color: var(--green-strong);
+}
+.weight-options button.selected {
+  background: #e6f3eb;
+  color: var(--green-strong);
+}
+.auth-story {
+  background: linear-gradient(
+    130deg,
+    color-mix(in srgb, var(--brand-green) 13%, white),
+    color-mix(in srgb, var(--brand-yellow) 25%, white)
+  );
+}
+@media (max-width: 760px) {
+  .closing-strip {
+    gap: 12px;
+  }
+  .closing-strip > span {
+    padding: 9px 12px;
+    font-size: 19px;
+  }
+  .closing-strip em {
+    white-space: nowrap;
+  }
+  .brand-story-card {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  .brand-story-card h2 {
+    font-size: 31px;
+    max-width: none;
+  }
+  .brand-reference {
+    max-width: 300px;
+    margin-inline: auto;
+  }
+}
+.checkout-coupon {
+  display: grid;
+  gap: 9px;
+  margin: 20px 0;
+  font-size: 12px;
+  color: #526456;
+}
+.checkout-coupon input {
+  width: 100%;
+  border: 1px solid #dce5d8;
+  border-radius: 6px;
+  padding: 12px;
+  background: white;
+  font: inherit;
+  text-transform: uppercase;
+}
+.account-signout-actions {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+  margin-top: 20px;
+}
+.account-signout-actions > .text-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  text-align: left;
+  line-height: 1.6;
+}
+.account-signout-actions > .text-link > svg {
+  flex-shrink: 0;
+}
+@media (max-width: 760px) {
+  .account-signout-actions {
+    margin-top: 16px;
+  }
+}

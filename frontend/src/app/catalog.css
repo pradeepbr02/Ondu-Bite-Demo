@@ -1,0 +1,466 @@
+/* Quiet product cards: generous photography, clear type and one consistent action. */
+.product-card.pantry-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid #e0e6da;
+  border-radius: 13px;
+  background: #fffefb;
+  box-shadow: none;
+  overflow: hidden;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.product-card.pantry-card:hover {
+  transform: none;
+  border-color: #a9bca2;
+  box-shadow: 0 5px 18px #173b2808;
+}
+.pantry-card .product-image-link {
+  aspect-ratio: 4 / 3;
+  background: #f6f6ef;
+  border-bottom: 1px solid #e9ecdf;
+  overflow: hidden;
+}
+/* Four pantry shelves, with a common light source behind each pack. */
+.food-visual[data-category='ready-to-eat'] {
+  --shelf-wall: #f4e2b9;
+  --shelf-base: #dec28a;
+}
+.food-visual[data-category='ready-to-mix'] {
+  --shelf-wall: #f1ddcc;
+  --shelf-base: #dcbca3;
+}
+.food-visual[data-category='coffee'] {
+  --shelf-wall: #dfd0bb;
+  --shelf-base: #c5ad8d;
+}
+.food-visual[data-category='snacks'] {
+  --shelf-wall: #e0e9d4;
+  --shelf-base: #bccbad;
+}
+.pantry-card .food-visual,
+.detail-visual > .food-visual {
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at 27% 16%, #fffaf0b3, transparent 65%),
+    linear-gradient(
+      168deg,
+      var(--shelf-wall, #ebe6d9) 68%,
+      var(--shelf-base, #d3cbb9) 68.4%,
+      var(--shelf-wall, #ebe6d9) 120%
+    );
+}
+.food-visual.package-photo[data-category='snacks'] > img {
+  mix-blend-mode: multiply;
+}
+.pantry-card .food-visual > img {
+  transition: none;
+}
+.pantry-card:hover .food-visual > img {
+  transform: none;
+}
+.pantry-card .food-visual.package-photo > img {
+  padding: 12px 16px 27px;
+  object-fit: contain;
+}
+.pantry-card .reference-pack-note {
+  left: 12px;
+  bottom: 10px;
+  max-width: calc(100% - 24px);
+  padding: 0;
+  background: transparent;
+  font-size: 8px;
+  color: #4d5146;
+  line-height: 1.6;
+}
+.pantry-card .package-scene + .reference-pack-note {
+  background: #fff9ed;
+  padding: 2px 5px;
+}
+.product-photos-wide > .detail-visual {
+  height: auto;
+  aspect-ratio: 4 / 3;
+}
+.product-photos-wide .detail-visual .food-visual > img {
+  object-fit: contain;
+}
+.pantry-card .product-info {
+  padding: 19px 18px 18px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.pantry-card .product-category {
+  font-size: 8px;
+  line-height: 1.6;
+  letter-spacing: 0.12em;
+  color: #62805c;
+  font-weight: 600;
+}
+.pantry-card .product-info h3,
+.pantry-picks .pantry-card .product-info h3 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: -0.3px;
+  line-height: 1.45;
+  min-height: 1.5em;
+  margin: 8px 0 1px;
+  color: #173b28;
+}
+.pantry-card .product-info h3 a {
+  display: block;
+}
+.pantry-card .product-caption,
+.pantry-picks .pantry-card .product-caption {
+  display: block;
+  min-height: 24px;
+  font-size: 11px;
+  margin: 0 0 13px;
+  line-height: 1.8;
+  color: #7d8973;
+}
+.pantry-card .product-caption .kannada {
+  font-size: 11px;
+}
+.card-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 7px;
+  margin-top: auto;
+  margin-bottom: 14px;
+}
+.card-price {
+  font-size: 20px;
+  line-height: 1.5;
+  font-weight: 600;
+  letter-spacing: -0.6px;
+  white-space: nowrap;
+}
+.card-price small {
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: #7b8771;
+}
+.card-stock {
+  font-size: 9px;
+  line-height: 1.5;
+  color: #8b7660;
+  white-space: nowrap;
+}
+.card-stock.available {
+  color: #4d7650;
+}
+.card-stock.available:before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #6b9462;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+.pantry-card .weight-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0 0 12px;
+}
+.pantry-card .weight-options > button,
+.pantry-picks .pantry-card .weight-options > button {
+  min-width: 0;
+  min-height: 36px;
+  border: 1px solid #dfe5d7;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 10px;
+  color: #61715b;
+  font-weight: 500;
+  line-height: 1.5;
+  padding: 7px 4px;
+}
+.pantry-card .weight-options > button.selected {
+  border-color: #8daf84;
+  background: #edf4e8;
+  color: #176039;
+  font-weight: 600;
+}
+.pantry-card .add-button,
+.pantry-picks .pantry-card .add-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 42px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #aac1a4;
+  border-radius: 7px;
+  background: #fffefb;
+  color: #116b37;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.pantry-card .add-button:hover:not(:disabled) {
+  background: #edf4e8;
+  border-color: #6b9763;
+}
+.pantry-card .add-button:disabled {
+  background: #f1f2e9;
+  border-color: #e0e5d7;
+  color: #8a927f;
+  opacity: 0.8;
+}
+.product-card a:focus-visible,
+.product-card button:focus-visible {
+  outline: 2px solid #a17c15;
+  outline-offset: 3px;
+}
+.product-photos {
+  min-width: 0;
+}
+.photo-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.photo-options button {
+  width: 60px;
+  height: 60px;
+  padding: 4px;
+  background: var(--brand-paper);
+  border: 1px solid #cec6af;
+  border-radius: 8px;
+}
+.photo-options button[aria-pressed='true'] {
+  border: 2px solid var(--green-strong);
+}
+.photo-options img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.product-load-more {
+  display: grid;
+  justify-items: center;
+  gap: 13px;
+  margin-top: 28px;
+  min-height: 42px;
+  color: #7c8874;
+  font-size: 11px;
+}
+.product-load-more p {
+  font-size: 11px;
+  margin: 0;
+}
+.product-load-more .button {
+  font-size: 12px;
+  min-height: 43px;
+  padding: 11px 22px;
+}
+.product-group-heading {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-top: 14px;
+  margin-bottom: 0;
+  padding-bottom: 13px;
+  border-bottom: 1px solid #dfe7d6;
+}
+.product-group-heading:first-child {
+  margin-top: 0;
+}
+.product-group-heading h2 {
+  font-size: 27px;
+  line-height: 1.3;
+  letter-spacing: -0.6px;
+  margin: 0;
+}
+.product-group-heading .kannada {
+  font-size: 12px;
+  color: #79896f;
+}
+.product-group-heading > span:last-child {
+  margin-left: auto;
+  font-size: 10px;
+  color: #7b8872;
+}
+.sort-control {
+  max-width: 240px;
+}
+.sort-control select {
+  max-width: 210px;
+}
+.food-placeholder {
+  pointer-events: none;
+}
+@media (max-width: 1100px) {
+  .pantry-card .product-info {
+    padding: 16px 14px;
+  }
+  .pantry-card .product-info h3,
+  .pantry-picks .pantry-card .product-info h3 {
+    font-size: 16px;
+    min-height: 1.5em;
+  }
+  .card-price {
+    font-size: 18px;
+  }
+  .card-stock {
+    font-size: 8px;
+  }
+  .card-price small {
+    font-size: 8px;
+  }
+  .pantry-card .weight-options {
+    gap: 5px;
+  }
+}
+@media (max-width: 760px) {
+  .pantry-card .product-info {
+    padding: 14px 12px;
+  }
+  .pantry-card .food-visual.package-photo > img {
+    padding: 7px 8px 22px;
+  }
+  .pantry-card .product-info h3,
+  .pantry-picks .pantry-card .product-info h3 {
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 1.5em;
+    margin-top: 6px;
+  }
+  .pantry-card .product-category {
+    font-size: 7px;
+    letter-spacing: 0.07em;
+  }
+  .pantry-card .product-caption,
+  .pantry-picks .pantry-card .product-caption {
+    min-height: 22px;
+    margin-bottom: 10px;
+  }
+  .pantry-card .product-caption .kannada {
+    font-size: 9px;
+  }
+  .card-price-row {
+    flex-wrap: wrap;
+    gap: 2px 6px;
+    margin-bottom: 11px;
+  }
+  .card-price {
+    font-size: 18px;
+  }
+  .card-price small {
+    font-size: 8px;
+  }
+  .card-stock {
+    font-size: 8px;
+  }
+  .card-stock.available:before {
+    width: 3px;
+    height: 3px;
+    margin-right: 4px;
+  }
+  .pantry-card .weight-options,
+  .pantry-picks .pantry-card .weight-options {
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  .pantry-card .weight-options > button,
+  .pantry-picks .pantry-card .weight-options > button {
+    min-height: 34px;
+    font-size: 9px;
+    border-radius: 5px;
+  }
+  .pantry-card .add-button,
+  .pantry-picks .pantry-card .add-button {
+    min-height: 40px;
+    font-size: 11px;
+    gap: 6px;
+    padding-inline: 6px;
+  }
+  .pantry-card .add-button > svg {
+    width: 14px;
+  }
+  .pantry-card .reference-pack-note {
+    font-size: 8px;
+    left: 9px;
+    bottom: 7px;
+    max-width: calc(100% - 18px);
+  }
+  .product-group-heading {
+    flex-wrap: wrap;
+    gap: 5px 10px;
+    padding-bottom: 10px;
+  }
+  .product-group-heading h2 {
+    font-size: 23px;
+  }
+  .product-group-heading .kannada {
+    font-size: 10px;
+  }
+  .product-group-heading > span:last-child {
+    font-size: 9px;
+  }
+  .sort-control {
+    max-width: 190px;
+  }
+  .sort-control select {
+    max-width: 166px !important;
+  }
+  .shop-controls {
+    gap: 10px;
+  }
+  .shop-controls > .input {
+    min-width: 0;
+  }
+}
+@media (max-width: 370px) {
+  .pantry-card .product-info {
+    padding: 12px 10px;
+  }
+  .pantry-card .product-info h3,
+  .pantry-picks .pantry-card .product-info h3 {
+    font-size: 13px;
+    min-height: 40px;
+  }
+  .card-price {
+    font-size: 16px;
+  }
+  .card-stock {
+    font-size: 7px;
+  }
+  .card-price small {
+    font-size: 7px;
+  }
+  .pantry-card .weight-options > button,
+  .pantry-picks .pantry-card .weight-options > button {
+    font-size: 8px;
+  }
+  .pantry-card .product-caption .kannada {
+    font-size: 8px;
+  }
+  .sort-control {
+    max-width: 160px;
+  }
+  .sort-control select {
+    max-width: 140px !important;
+  }
+}
+.pantry-card .add-button:hover:not(:disabled),
+.pantry-picks .pantry-card .add-button:hover:not(:disabled) {
+  color: #116b37;
+  background: #edf4e8;
+  border-color: #6b9763;
+}

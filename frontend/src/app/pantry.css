@@ -1,0 +1,399 @@
+.kannada {
+  font-family: 'Noto Sans Kannada', 'Nirmala UI', Tunga, sans-serif;
+  letter-spacing: 0;
+  font-style: normal;
+  line-height: 1.7;
+}
+.hero .hero-kannada {
+  font-size: 0.72em;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+}
+.hero-translation {
+  display: block;
+  font-size: 11px;
+  color: #6c7f6b;
+  margin: -8px 0 21px;
+  letter-spacing: 0.035em;
+}
+.hero-copy > .eyebrow .kannada {
+  font-size: 13px;
+}
+.hero-sticker .kannada {
+  font-size: 16px;
+  font-weight: 600;
+}
+.hero-sticker small {
+  font-size: 7px;
+  letter-spacing: 0.08em;
+}
+.category-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+.category-tile > .food-visual {
+  height: 205px;
+}
+.category-tile > div:last-child {
+  padding: 18px 20px;
+  background: #f1f4e8;
+}
+.category-tile h3 {
+  font-size: 19px;
+}
+.category-kannada {
+  display: block;
+  font-size: 12px;
+  color: #63795c;
+  margin-top: 6px;
+}
+.category-tile:nth-child(2) > div:last-child {
+  background: #f7eddb;
+}
+.category-tile:nth-child(3) > div:last-child {
+  background: #fcf1cf;
+}
+.category-tile:nth-child(4) > div:last-child {
+  background: #eaf1e4;
+}
+.section-heading .eyebrow > .kannada {
+  font-size: 12px;
+  margin-right: 4px;
+}
+.story-kannada {
+  font-size: 24px;
+  color: #f3b718;
+  display: block;
+  margin: 17px 0 -8px;
+}
+.story-copy .eyebrow {
+  line-height: 1.7;
+}
+.story-copy h2 {
+  font-size: 39px;
+}
+.food-placeholder {
+  position: absolute;
+  width: 32%;
+  height: 32%;
+  left: 34%;
+  top: 34%;
+  color: #92a785;
+  opacity: 0.5;
+}
+.product-caption .kannada {
+  font-size: 12px;
+}
+.photo-credits {
+  padding-bottom: 45px;
+}
+.photo-credits > h1 {
+  font-size: clamp(36px, 5vw, 60px);
+  margin: 20px 0;
+}
+.photo-credits > p {
+  font-size: 14px;
+  line-height: 1.9;
+  max-width: 760px;
+  color: #61705f;
+}
+.photo-credit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 35px 0;
+}
+.photo-credit {
+  display: flex;
+  gap: 18px;
+  border: 1px solid #dfe6d8;
+  border-radius: 10px;
+  padding: 20px;
+  align-items: flex-start;
+  background: #fffefb;
+  min-width: 0;
+}
+.photo-credit > img {
+  width: 110px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.photo-credit > div {
+  min-width: 0;
+}
+.photo-credit h2 {
+  font-size: 18px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  margin-bottom: 10px;
+}
+.photo-credit p {
+  font-size: 10px;
+  line-height: 1.8;
+  color: #71806c;
+  margin-bottom: 8px;
+}
+.photo-credit a {
+  font-size: 11px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.photo-credit span {
+  font-size: 11px;
+}
+.closing-strip .kannada {
+  font-size: 0.75em;
+}
+.mobile-nav .kannada {
+  font-size: 11px;
+  color: #71806c;
+}
+.hero-photo {
+  background: #eef3e6;
+}
+.hero-photo > img {
+  object-position: center;
+}
+.story-photo > img {
+  object-position: center;
+}
+.photo-caption {
+  max-width: 85%;
+  line-height: 1.5;
+}
+@media (max-width: 1200px) {
+  .category-tile > .food-visual {
+    height: 170px;
+  }
+  .category-tile > div:last-child {
+    padding: 16px;
+  }
+  .category-tile h3 {
+    font-size: 17px;
+  }
+  .category-kannada {
+    font-size: 10px;
+  }
+  .desktop-nav {
+    gap: 22px;
+  }
+  .header-search {
+    width: 160px;
+  }
+  .story-copy h2 {
+    font-size: 34px;
+  }
+}
+@media (max-width: 1000px) {
+  .hero .hero-kannada {
+    font-size: 0.7em;
+  }
+  .hero-translation {
+    font-size: 10px;
+  }
+  .category-tile > .food-visual {
+    height: 150px;
+  }
+  .category-tile > div:last-child {
+    padding: 14px 12px;
+  }
+  .category-tile h3 {
+    font-size: 15px;
+  }
+  .category-kannada {
+    font-size: 9px;
+  }
+  .desktop-nav {
+    gap: 22px;
+  }
+  .photo-credit-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .hero h1 {
+    font-size: 64px;
+  }
+  .hero .hero-kannada {
+    font-size: 0.7em;
+    line-height: 1.55;
+  }
+  .hero-translation {
+    font-size: 10px;
+    margin: -4px 0 18px;
+  }
+  .hero-copy > .eyebrow .kannada {
+    font-size: 11px;
+  }
+  .hero-sticker .kannada {
+    font-size: 12px;
+  }
+  .hero-sticker small {
+    font-size: 5px;
+  }
+  .hero-sticker {
+    gap: 2px;
+  }
+  .category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    width: 100%;
+    margin-right: 0;
+    padding-right: 0;
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+  .category-tile > .food-visual {
+    height: 145px;
+  }
+  .category-tile > div:last-child {
+    padding: 14px 12px;
+    gap: 5px;
+    align-items: center;
+  }
+  .category-tile h3 {
+    font-size: 17px;
+  }
+  .category-kannada {
+    font-size: 10px;
+    margin-top: 5px;
+  }
+  .section-heading .eyebrow {
+    line-height: 1.9;
+    font-size: 6px;
+  }
+  .section-heading .eyebrow > .kannada {
+    font-size: 10px;
+  }
+  .story-kannada {
+    font-size: 22px;
+    margin: 12px 0 -4px;
+  }
+  .story-copy h2 {
+    font-size: 34px;
+  }
+  .photo-credit {
+    padding: 16px;
+    gap: 14px;
+  }
+  .photo-credit > img {
+    width: 75px;
+    height: 85px;
+  }
+  .photo-credit h2 {
+    font-size: 16px;
+  }
+  .photo-credits > p {
+    font-size: 12px;
+  }
+  .closing-strip {
+    font-size: 18px;
+  }
+}
+@media (max-width: 370px) {
+  .hero h1 {
+    font-size: 56px;
+  }
+  .hero .hero-kannada {
+    font-size: 0.69em;
+  }
+  .category-tile > .food-visual {
+    height: 122px;
+  }
+  .category-tile h3 {
+    font-size: 15px;
+  }
+  .category-kannada {
+    font-size: 9px;
+  }
+  .category-tile > div:last-child {
+    padding: 12px 10px;
+  }
+  .category-grid {
+    gap: 11px;
+  }
+  .closing-strip {
+    font-size: 16px;
+  }
+  .photo-credit {
+    flex-direction: column;
+  }
+  .photo-credit > img {
+    width: 100%;
+    height: 150px;
+  }
+}
+@font-face {
+  font-family: 'Noto Sans Kannada';
+  src: url('/fonts/NotoSansKannada-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noto Sans Kannada';
+  src: url('/fonts/NotoSansKannada-Medium.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+}
+.food-visual.package-photo {
+  background: #f7f6f0;
+}
+.food-visual.package-photo > img {
+  object-fit: contain;
+  padding: 20px;
+}
+.package-hero {
+  background: linear-gradient(140deg, #f1f5e9, #fff5d6);
+}
+.hero-photo.package-hero > img {
+  object-fit: contain;
+  padding: 38px 60px;
+}
+.story-photo.package-story {
+  background: #f5f2e7;
+}
+.story-photo.package-story > img {
+  object-fit: contain;
+  padding: 30px;
+}
+.reference-pack-note {
+  position: absolute;
+  bottom: 9px;
+  left: 9px;
+  max-width: calc(100% - 45px);
+  padding: 4px 6px;
+  background: #fffefaeb;
+  color: #4a5e47;
+  font-size: 8px;
+  border-radius: 3px;
+  line-height: 1.5;
+}
+.packaging-reference-info {
+  padding: 10px 13px;
+  background: #f4f2e6;
+  border-radius: 5px;
+  font-size: 11px !important;
+  line-height: 1.8;
+}
+@media (max-width: 760px) {
+  .food-visual.package-photo > img {
+    padding: 14px;
+  }
+  .hero-photo.package-hero > img {
+    padding: 18px 28px;
+  }
+  .story-photo.package-story > img {
+    padding: 22px;
+  }
+  .reference-pack-note {
+    font-size: 6px;
+    padding: 3px 5px;
+    bottom: 7px;
+    left: 7px;
+  }
+}
