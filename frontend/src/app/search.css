@@ -127,15 +127,6 @@
   outline-offset: 2px;
 }
 
-.shop-search {
-  --search-inset: 8px;
-  display: flex;
-  flex: 1;
-  max-width: 265px;
-  min-width: 0;
-  padding-left: 15px;
-}
-
 .header-actions > .mobile-search-toggle,
 .mobile-search-panel {
   display: none;
@@ -172,10 +163,6 @@
   .store-search {
     --search-font-size: 16px;
   }
-
-  .shop-search {
-    max-width: none;
-  }
 }
 
 @media (max-width: 385px) {
@@ -195,15 +182,5 @@
 
   .header-actions > .icon-button {
     width: 28px;
-  }
-}
-
-@media (max-width: 460px) {
-  .shop-controls {
-    flex-wrap: wrap;
-  }
-
-  .shop-search {
-    flex-basis: 100%;
   }
 }

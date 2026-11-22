@@ -12,7 +12,6 @@ import {
   Minus,
   Plus,
   RefreshCw,
-  Search,
   ShoppingBag,
   SlidersHorizontal,
   Truck,
@@ -23,7 +22,6 @@ import { selectShopProducts, shopSortOptions } from '@/lib/shop-catalog';
 import { FoodVisual } from './food-visual';
 import { ProductCard } from './product-card';
 import { CustomerReviews } from './customer-reviews';
-import { RotatingSearchInput } from './rotating-search-input';
 export { FoodVisual } from './food-visual';
 export { ProductCard } from './product-card';
 import { LazyProductGrid } from './lazy-product-grid';
@@ -250,9 +248,8 @@ export function Shop() {
   const { products, categories, catalogError } = useStore();
   const params = useSearchParams();
   const category = params.get('category') ?? '';
-  const [query, setQuery] = useState(params.get('q') ?? '');
+  const query = params.get('q') ?? '';
   const [sort, setSort] = useState('featured');
-  useEffect(() => setQuery(params.get('q') ?? ''), [params]);
   const filtered = selectShopProducts(products, categories, category, query, sort);
   return (
     <section className="container section shop-page">
@@ -278,10 +275,6 @@ export function Shop() {
           ))}
         </nav>
         <div className="shop-controls">
-          <label className="store-search shop-search">
-            <Search size={17} aria-hidden="true" />
-            <RotatingSearchInput label="Search products" value={query} onChange={setQuery} />
-          </label>
           <label className="sort-control">
             <SlidersHorizontal size={16} />
             <span className="sr-only">Sort products</span>
@@ -314,7 +307,7 @@ export function Shop() {
           <Flower2 />
           <h2>No bites found.</h2>
           <p>Try another search or explore a different category.</p>
-          <Link href="/shop" className="button primary" onClick={() => setQuery('')}>
+          <Link href="/shop" className="button primary">
             Explore all products
           </Link>
         </div>
