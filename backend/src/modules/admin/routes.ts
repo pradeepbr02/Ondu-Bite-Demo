@@ -2,6 +2,7 @@ import { Router } from 'express';
 import mongoose, { type ClientSession } from 'mongoose';
 import { z } from 'zod';
 import { requireCustomer, requireAdmin } from '../identity/auth.js';
+import { Customer, Session } from '../identity/models.js';
 import { Category, Product, Variant } from '../catalog/models.js';
 import { Inventory } from '../inventory/models.js';
 import { Order } from '../checkout/models.js';
@@ -78,6 +79,12 @@ const tx = {
   readConcern: { level: 'snapshot' as const },
   writeConcern: { w: 'majority' as const },
 };
+const roleBody = z
+  .object({
+    email: z.string().trim().toLowerCase().pipe(z.email().max(254)),
+    role: z.enum(['admin', 'customer']),
+  })
+  .strict();
 const conflict = () =>
   new AppError(409, 'EDIT_CONFLICT', 'This record changed. Reload it before saving again.');
 const search = (q: string) => new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
@@ -129,6 +136,47 @@ async function validateImages(images: string[], session: ClientSession) {
 export const adminRouter = Router();
 adminRouter.use(requireCustomer, requireAdmin);
 adminRouter.get('/me', (_req, res) => res.json({ data: res.locals.customer }));
+adminRouter.put('/access', async (req, res) => {
+  const { email, role } = roleBody.parse(req.body);
+  const actor = res.locals.customer;
+  if (actor.email === email)
+    throw new AppError(409, 'SELF_ROLE_CHANGE', 'Ask another administrator to change your access.');
+
+  const data = await mongoose.connection.transaction(async (session) => {
+    // Write to the actor so concurrent revocations cannot both rely on stale admin roles.
+    const admin = await Customer.updateOne(
+      { _id: actor.id, active: true, role: 'admin' },
+      { $inc: { roleRevision: 1 } },
+      { session },
+    );
+    if (!admin.matchedCount)
+      throw new AppError(403, 'ADMIN_REQUIRED', 'Administrator access is required.');
+    const activeSession = await Session.exists({
+      _id: res.locals.sessionId,
+      customerId: actor.id,
+      expiresAt: { $gt: new Date() },
+    }).session(session);
+    if (!activeSession) throw new AppError(401, 'UNAUTHENTICATED', 'A valid session is required.');
+
+    const target = await Customer.findOne({ email, active: true }).session(session);
+    if (!target)
+      throw new AppError(
+        404,
+        'ACCOUNT_NOT_FOUND',
+        'No active account is registered with that email.',
+      );
+
+    const previousRole = target.role ?? 'customer';
+    if (previousRole === role) return { email, role, changed: false };
+
+    target.role = role;
+    await target.save({ session });
+    await Session.deleteMany({ customerId: target._id }, { session });
+    await audit(actor.id, 'ROLE_CHANGED', target.id, { previousRole, role }, session);
+    return { email, role, changed: true };
+  }, tx);
+  res.json({ data });
+});
 adminRouter.get('/summary', async (_req, res) => {
   const [products, orders, awaitingPayment, toFulfill, lowStock] = await Promise.all([
     Product.countDocuments({ active: true }),

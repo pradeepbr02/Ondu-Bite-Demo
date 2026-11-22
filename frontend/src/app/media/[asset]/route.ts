@@ -24,6 +24,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ ass
     const etag = `"${data.sha256}"`;
     const headers = {
       'Cache-Control': 'public, max-age=300',
+      'Vercel-CDN-Cache-Control':
+        'public, s-maxage=900, stale-while-revalidate=60, stale-if-error=3600',
       ETag: etag,
       'X-Image-Source': 'object-storage',
       'X-Content-Type-Options': 'nosniff',

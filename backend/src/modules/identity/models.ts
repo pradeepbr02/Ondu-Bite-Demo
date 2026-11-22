@@ -7,6 +7,7 @@ const customerSchema = new Schema(
     passwordHash: { type: String, required: true, select: false },
     active: { type: Boolean, default: true },
     role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
+    roleRevision: { type: Number, default: 0, select: false },
   },
   { timestamps: true },
 );

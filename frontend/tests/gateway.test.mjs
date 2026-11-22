@@ -35,6 +35,7 @@ test('cookie authenticated mutations require the exact frontend origin', () => {
 test('admin gateway exposes only explicit operations and identifiers', () => {
   for (const [path, method] of [
     ['admin/me', 'GET'],
+    ['admin/access', 'PUT'],
     ['admin/products', 'POST'],
     ['admin/products/aaaaaaaaaaaaaaaaaaaaaaaa', 'PUT'],
     ['admin/inventory/adjustments', 'POST'],
@@ -46,6 +47,7 @@ test('admin gateway exposes only explicit operations and identifiers', () => {
     ['admin/products', 'DELETE'],
     ['admin/users', 'POST'],
     ['admin/role', 'PUT'],
+    ['admin/access', 'GET'],
     ['admin/products/../../auth/me', 'GET'],
     ['admin/images', 'GET'],
     ['admin/orders/not-an-id', 'GET'],

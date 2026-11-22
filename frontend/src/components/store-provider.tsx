@@ -21,6 +21,7 @@ const emptyCart: Cart = {
 };
 const guestKey = 'ondu-packet-guest-cart-v1';
 const legacyGuestKey = 'nalla-guest-cart-v1';
+const catalogRetryDelays = [3000, 10000, 20000];
 type Context = {
   products: Product[];
   categories: Category[];
@@ -105,6 +106,7 @@ export function StoreProvider({
   const [products, setProducts] = useState(initial.products);
   const [categories, setCategories] = useState(initial.categories);
   const [catalogError, setCatalogError] = useState(initial.error);
+  const [catalogRetry, setCatalogRetry] = useState(0);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [ready, setReady] = useState(false);
   const [cart, setCart] = useState<Cart>(emptyCart);
@@ -134,6 +136,16 @@ export function StoreProvider({
       setCatalogError(error instanceof Error ? error.message : 'Could not load products.');
     }
   }, []);
+
+  const catalogUnavailable = Boolean(catalogError);
+  useEffect(() => {
+    const delay = catalogRetryDelays[catalogRetry];
+    if (!initial.error || !catalogUnavailable || delay === undefined) return;
+    const timer = setTimeout(() => {
+      void reloadCatalog().then(() => setCatalogRetry((attempt) => attempt + 1));
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [initial.error, catalogUnavailable, catalogRetry, reloadCatalog]);
 
   async function loadCustomerCart(profile: Customer) {
     setCustomer(profile);

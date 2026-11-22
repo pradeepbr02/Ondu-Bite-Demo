@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import Link from 'next/link';
 import {
   LayoutDashboard,
@@ -22,13 +22,14 @@ import { Brand } from '../shell';
 import { ProductEditor, CouponEditor, StockEditor, OrderEditor } from './editors';
 import type { AdminProduct, AdminOrder, Stock, Coupon, Audit } from './types';
 
-type Section = 'overview' | 'orders' | 'products' | 'inventory' | 'discounts' | 'audit';
+type Section = 'overview' | 'orders' | 'products' | 'inventory' | 'discounts' | 'audit' | 'access';
 const navigation = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'orders', label: 'Orders', icon: ClipboardList },
   { id: 'products', label: 'Products', icon: Package },
   { id: 'inventory', label: 'Inventory', icon: Boxes },
   { id: 'discounts', label: 'Discounts', icon: Tag },
+  { id: 'access', label: 'Admin access', icon: ShieldCheck },
   { id: 'audit', label: 'Activity', icon: History },
 ] as const;
 const label = (s: string) => s.toLowerCase().replaceAll('_', ' ');
@@ -162,7 +163,11 @@ export function AdminPortal() {
               </button>
             </div>
           )}
-          <AdminSection key={section} section={section} onSaved={setNotice} />
+          {section === 'access' ? (
+            <AdminAccess onSaved={setNotice} />
+          ) : (
+            <AdminSection key={section} section={section} onSaved={setNotice} />
+          )}
         </main>
         <footer className="admin-footer">
           Ondu Packet · Store operations <span>India · INR</span>
@@ -172,7 +177,82 @@ export function AdminPortal() {
   );
 }
 
-function AdminSection({ section, onSaved }: { section: Section; onSaved: (s: string) => void }) {
+function AdminAccess({ onSaved }: { onSaved: (message: string) => void }) {
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  async function save(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const details = new FormData(form);
+    setSaving(true);
+    setError('');
+    onSaved('');
+    try {
+      const result = await api<{ email: string; role: 'admin' | 'customer'; changed: boolean }>(
+        'admin/access',
+        {
+          method: 'PUT',
+          body: JSON.stringify({ email: details.get('email'), role: details.get('role') }),
+        },
+      );
+      const access = result.role === 'admin' ? 'admin access' : 'customer access';
+      onSaved(
+        result.changed
+          ? `${result.email} now has ${access} and will need to sign in again.`
+          : `${result.email} already has ${access}.`,
+      );
+      form.reset();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Could not update admin access.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <>
+      <div className="admin-heading">
+        <div>
+          <h1>Admin access</h1>
+          <p>Grant or revoke access for a registered storefront account.</p>
+        </div>
+      </div>
+      <form className="admin-card admin-editor" onSubmit={save}>
+        <fieldset className="admin-form-grid" disabled={saving}>
+          <label>
+            Account email
+            <input name="email" type="email" autoComplete="off" maxLength={254} required />
+          </label>
+          <label>
+            Action
+            <select name="role" defaultValue="" required>
+              <option value="" disabled>
+                Choose an action
+              </option>
+              <option value="admin">Grant admin access</option>
+              <option value="customer">Revoke admin access</option>
+            </select>
+          </label>
+        </fieldset>
+        {error && <p role="alert">{error}</p>}
+        <div className="admin-form-actions">
+          <button className="button primary" type="submit" disabled={saving}>
+            {saving ? 'Updating access…' : 'Update access'}
+          </button>
+        </div>
+      </form>
+    </>
+  );
+}
+
+function AdminSection({
+  section,
+  onSaved,
+}: {
+  section: Exclude<Section, 'access'>;
+  onSaved: (s: string) => void;
+}) {
   const [rows, setRows] = useState<(AdminProduct | AdminOrder | Stock | Coupon | Audit)[]>([]);
   const [summary, setSummary] = useState<Record<string, number>>({});
   const [page, setPage] = useState(1);

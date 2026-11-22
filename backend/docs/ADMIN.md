@@ -12,6 +12,8 @@ npm run admin:role -- your-email@example.com admin
 
 Sign in again after promotion. The command revokes existing sessions. To revoke admin access, run the same command with `customer` instead of `admin`. There are no default production admin credentials and no public role management endpoint.
 
+Existing administrators can open **Admin access** in the portal and grant or revoke access using the registered account email. Changes revoke the target account’s sessions and are recorded in **Activity**. An administrator cannot change their own role through the portal.
+
 Run `npm run db:indexes` when deploying to install the new audit, coupon and order indexes. Restart the API and frontend after building. The inventory expiry worker continues to release expired checkout reservations independently.
 
 ## API contract
@@ -21,6 +23,7 @@ All routes below use `/api/v1/admin`, require an active admin bearer session and
 | Method     | Path                             | Purpose                                                                  |
 | ---------- | -------------------------------- | ------------------------------------------------------------------------ |
 | GET        | `/me`, `/summary`, `/categories` | Access, dashboard, category selection                                    |
+| PUT        | `/access`                        | Update a registered account role using `{ email, role }`                 |
 | GET / POST | `/products`                      | Search products / create product and variants                            |
 | GET / PUT  | `/products/:id`                  | Read / edit product with expected `revision`                             |
 | POST       | `/images`                        | Raw JPEG/PNG/WebP body, max 8 MB; returns stable `/media/product-<hash>` |

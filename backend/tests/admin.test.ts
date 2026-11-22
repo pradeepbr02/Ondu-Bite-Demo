@@ -105,6 +105,78 @@ function couponInput() {
 }
 
 describe('admin authorization', () => {
+  it('changes roles by email, revokes sessions and records the acting admin', async () => {
+    const path = '/api/v1/admin/access';
+    const grant = { email: ' SHOPPER@Example.com ', role: 'admin' };
+    await request(app).put(path).send(grant).expect(401);
+    await request(app).put(path).auth(customerToken, { type: 'bearer' }).send(grant).expect(403);
+    await request(app)
+      .put(path)
+      .set(auth())
+      .send({ email: 'admin@example.com', role: 'customer' })
+      .expect(409);
+    await request(app)
+      .put(path)
+      .set(auth())
+      .send({ email: 'absent@example.com', role: 'admin' })
+      .expect(404);
+    await request(app)
+      .put(path)
+      .set(auth())
+      .send(grant)
+      .expect(200, { data: { email: 'shopper@example.com', role: 'admin', changed: true } });
+    await request(app).get('/api/v1/admin/me').auth(customerToken, { type: 'bearer' }).expect(401);
+
+    const shopper = await Customer.findOne({ email: 'shopper@example.com' }).orFail();
+    const newSession = (await issueSession(shopper.id)).accessToken;
+    await request(app)
+      .put(path)
+      .set(auth())
+      .send(grant)
+      .expect(200, {
+        data: { email: 'shopper@example.com', role: 'admin', changed: false },
+      });
+    await request(app).get('/api/v1/admin/me').auth(newSession, { type: 'bearer' }).expect(200);
+    await request(app)
+      .put(path)
+      .set(auth())
+      .send({ ...grant, role: 'customer' })
+      .expect(200);
+    await request(app).get('/api/v1/admin/me').auth(newSession, { type: 'bearer' }).expect(401);
+    expect(await Customer.findById(shopper.id).orFail()).toMatchObject({ role: 'customer' });
+    const audits = await AdminAudit.find({
+      actorId: adminId,
+      target: shopper.id,
+      action: 'ROLE_CHANGED',
+    });
+    expect(audits).toHaveLength(2);
+    expect(audits.map((record) => record.details)).toEqual(
+      expect.arrayContaining([
+        { previousRole: 'customer', role: 'admin' },
+        { previousRole: 'admin', role: 'customer' },
+      ]),
+    );
+  });
+
+  it('keeps an active admin when two admins try to revoke each other', async () => {
+    const second = await Customer.findOneAndUpdate(
+      { email: 'shopper@example.com' },
+      { role: 'admin' },
+    ).orFail();
+    const secondToken = (await issueSession(second.id)).accessToken;
+    const path = '/api/v1/admin/access';
+    const results = await Promise.all([
+      request(app).put(path).set(auth()).send({ email: second.email, role: 'customer' }),
+      request(app)
+        .put(path)
+        .auth(secondToken, { type: 'bearer' })
+        .send({ email: 'admin@example.com', role: 'customer' }),
+    ]);
+    expect(results.filter((result) => result.status === 200)).toHaveLength(1);
+    expect([401, 403]).toContain(results.find((result) => result.status !== 200)?.status);
+    expect(await Customer.countDocuments({ role: 'admin', active: true })).toBe(1);
+  });
+
   it('requires an active administrator on every endpoint, including uploads', async () => {
     for (const path of [
       'me',

@@ -1,5 +1,6 @@
 const rules: [RegExp, string[]][] = [
   [/^admin\/(me|summary|categories|audit)$/, ['GET']],
+  [/^admin\/access$/, ['PUT']],
   [/^admin\/products$/, ['GET', 'POST']],
   [/^admin\/products\/[a-f0-9]{24}$/, ['GET', 'PUT']],
   [/^admin\/inventory$/, ['GET']],
