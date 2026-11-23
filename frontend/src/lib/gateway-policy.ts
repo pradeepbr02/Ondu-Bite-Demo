@@ -14,7 +14,7 @@ const rules: [RegExp, string[]][] = [
   [/^categories$/, ['GET']],
   [/^products$/, ['GET']],
   [/^products\/[a-z0-9-]+$/, ['GET']],
-  [/^auth\/(login|register)$/, ['POST']],
+  [/^auth\/(login|register|guest|phone\/(send|verify))$/, ['POST']],
   [/^auth\/me$/, ['GET']],
   [/^auth\/(logout|logout-all)$/, ['POST']],
   [/^cart$/, ['GET', 'PUT']],

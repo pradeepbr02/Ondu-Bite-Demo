@@ -1,6 +1,6 @@
 import { Router, type RequestHandler } from 'express';
 import { z } from 'zod';
-import { requireCustomer } from '../identity/auth.js';
+import { requireShopper } from '../identity/auth.js';
 import { AppError } from '../../shared/errors.js';
 import {
   cancelCheckout,
@@ -36,7 +36,7 @@ const checkoutBody = quoteBody
 
 export function createCheckoutRouter(enabled: boolean) {
   const router = Router();
-  router.use(requireCustomer);
+  router.use(requireShopper);
   const requireDemoCheckout: RequestHandler = (_req, _res, next) => {
     if (!enabled)
       throw new AppError(503, 'CHECKOUT_NOT_READY', 'Checkout is not enabled for live purchases.');

@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { requireCustomer } from '../identity/auth.js';
+import { requireShopper } from '../identity/auth.js';
 import { Order } from './models.js';
 import { getActiveCheckout, getCheckout, orderDto } from './service.js';
 import { AppError } from '../../shared/errors.js';
 
 export const orderRouter = Router();
-orderRouter.use(requireCustomer);
+orderRouter.use(requireShopper);
 orderRouter.get('/', async (req, res) => {
   const { page, limit } = z
     .object({

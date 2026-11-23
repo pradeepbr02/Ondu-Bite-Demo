@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { api, apiEnvelope, ApiError } from '@/lib/api';
 import { collectCatalog } from '@/lib/catalog-pages';
-import type { Cart, CartInput, Category, Customer, Product } from '@/lib/types';
+import type { Address, Cart, CartInput, Category, Customer, Product } from '@/lib/types';
 
 const emptyCart: Cart = {
   revision: 0,
@@ -28,12 +28,15 @@ type Context = {
   catalogError: string | null;
   reloadCatalog: () => Promise<void>;
   customer: Customer | null;
+  guestCheckout: boolean;
   ready: boolean;
   cart: Cart;
   busy: boolean;
   notice: string;
   notify: (message: string) => void;
   login: (email: string, password: string) => Promise<void>;
+  loginWithPhone: (phone: string, code: string) => Promise<void>;
+  beginGuestCheckout: (email: string, address: Omit<Address, 'id'>) => Promise<void>;
   logout: (allDevices?: boolean) => Promise<void>;
   addItem: (sku: string, quantity?: number) => Promise<boolean>;
   setQuantity: (sku: string, quantity: number) => Promise<boolean>;
@@ -150,7 +153,7 @@ export function StoreProvider({
   async function loadCustomerCart(profile: Customer) {
     setCustomer(profile);
     let saved = await api<Cart>('cart');
-    const guest = readGuest();
+    const guest = profile.guest ? [] : readGuest();
     if (guest.length) {
       const merged = new Map(saved.items.map((i) => [i.sku, i.quantity]));
       for (const i of guest) merged.set(i.sku, Math.min(20, (merged.get(i.sku) ?? 0) + i.quantity));
@@ -201,14 +204,25 @@ export function StoreProvider({
     if (ready && !customer) setCart(guestCart(readGuest(), products));
   }, [products, ready, customer]);
 
-  async function login(email: string, password: string) {
-    const profile = await api<Customer>('auth/login', {
+  async function finishSignIn(path: string, credentials: Record<string, string>) {
+    const profile = await api<Customer>(path, {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(credentials),
     });
+    if (customer?.guest) saveGuest(cart.items.map(({ sku, quantity }) => ({ sku, quantity })));
     await loadCustomerCart(profile);
     setReady(true);
     notify(`Welcome back, ${profile.name.split(' ')[0]}.`);
+  }
+  async function beginGuestCheckout(email: string, address: Omit<Address, 'id'>) {
+    const items = cart.items.map(({ sku, quantity }) => ({ sku, quantity }));
+    const profile = await api<Customer>('auth/guest', {
+      method: 'POST',
+      body: JSON.stringify({ email, address, items }),
+    });
+    // The server has the full cart once it issues the guest session.
+    saveGuest([]);
+    await loadCustomerCart(profile);
   }
   async function logout(allDevices = false) {
     try {
@@ -269,13 +283,16 @@ export function StoreProvider({
         categories,
         catalogError,
         reloadCatalog,
-        customer,
+        customer: customer?.guest ? null : customer,
+        guestCheckout: customer?.guest === true,
         ready,
         cart,
         busy,
         notice,
         notify,
-        login,
+        login: (email, password) => finishSignIn('auth/login', { email, password }),
+        loginWithPhone: (phone, code) => finishSignIn('auth/phone/verify', { phone, code }),
+        beginGuestCheckout,
         logout,
         addItem: (sku, quantity = 1) => mutate(sku, quantity, true),
         setQuantity: (sku, quantity) => mutate(sku, quantity, false),

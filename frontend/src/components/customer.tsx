@@ -36,9 +36,9 @@ export function Loading({ text = 'Getting everything ready…' }: { text?: strin
   );
 }
 export function Guard({ children, next = '/account' }: { children: ReactNode; next?: string }) {
-  const { ready, customer } = useStore();
+  const { ready, customer, guestCheckout } = useStore();
   if (!ready) return <Loading />;
-  if (!customer)
+  if (!customer && !(guestCheckout && next === '/orders'))
     return (
       <div className="empty-state">
         <UserRound />
@@ -52,14 +52,114 @@ export function Guard({ children, next = '/account' }: { children: ReactNode; ne
   return children;
 }
 
+function PhoneSignIn({
+  onVerified,
+}: {
+  onVerified: (phone: string, code: string) => Promise<void>;
+}) {
+  const [phone, setPhone] = useState('');
+  const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  return (
+    <>
+      <h2>Sign in with your mobile number</h2>
+      <p>
+        {sent
+          ? `Enter the four-digit code sent to ${phone}.`
+          : 'We’ll text you a four-digit sign-in code.'}
+      </p>
+      <form
+        onSubmit={async (event) => {
+          event.preventDefault();
+          const data = new FormData(event.currentTarget);
+          setBusy(true);
+          setError('');
+          try {
+            if (sent) {
+              await onVerified(phone, String(data.get('code')));
+            } else {
+              await api('auth/phone/send', { method: 'POST', body: JSON.stringify({ phone }) });
+              setSent(true);
+            }
+          } catch (error) {
+            setError(error instanceof Error ? error.message : 'Please try again.');
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        {error && (
+          <div className="form-error" role="alert">
+            {error}
+          </div>
+        )}
+        {sent ? (
+          <label>
+            Four-digit code
+            <input
+              className="input"
+              name="code"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              pattern="[0-9]{4}"
+              minLength={4}
+              maxLength={4}
+              required
+            />
+          </label>
+        ) : (
+          <label>
+            Mobile number
+            <input
+              className="input"
+              name="phone"
+              type="tel"
+              autoComplete="tel"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              disabled={busy}
+              pattern="(\+91)?[6-9][0-9]{9}"
+              maxLength={13}
+              placeholder="9876543210"
+              required
+            />
+          </label>
+        )}
+        <button className="button primary full" disabled={busy}>
+          {busy ? 'Please wait…' : sent ? 'Verify and sign in' : 'Send code'}
+        </button>
+        {sent && (
+          <button
+            className="text-link"
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              setSent(false);
+              setError('');
+            }}
+          >
+            Change number or request a new code
+          </button>
+        )}
+      </form>
+    </>
+  );
+}
+
 export function Account() {
-  const { customer, ready, login, logout, notify } = useStore();
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const { customer, ready, login, loginWithPhone, logout, notify } = useStore();
+  const [mode, setMode] = useState<'login' | 'register' | 'phone'>('login');
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const router = useRouter();
+  function goToNextPage() {
+    const next = new URLSearchParams(window.location.search).get('next');
+    if (next && ['/checkout', '/cart', '/orders', '/admin'].includes(next)) router.push(next);
+  }
   if (!ready) return <Loading />;
   if (customer)
     return (
@@ -73,7 +173,7 @@ export function Account() {
           <aside className="panel account-sidebar">
             <UserRound />
             <h3>{customer.name}</h3>
-            <p>{customer.email}</p>
+            <p>{customer.email || customer.phone}</p>
             {customer.role === 'admin' && (
               <Link href="/admin">
                 <Package size={18} /> Store administration <ArrowUpRight size={16} />
@@ -151,6 +251,16 @@ export function Account() {
             Sign in
           </button>
           <button
+            className={mode === 'phone' ? 'selected' : ''}
+            onClick={() => {
+              setMode('phone');
+              setError('');
+              setSuccess('');
+            }}
+          >
+            Mobile OTP
+          </button>
+          <button
             className={mode === 'register' ? 'selected' : ''}
             onClick={() => {
               setMode('register');
@@ -160,110 +270,120 @@ export function Account() {
             Create account
           </button>
         </div>
-        <h2>{mode === 'login' ? 'Welcome back.' : 'Hello, new friend.'}</h2>
-        <p>
-          {mode === 'login'
-            ? 'A little goodness is just a sign-in away.'
-            : 'Let’s make some room in your pantry.'}
-        </p>
-        {error && (
-          <div className="form-error" role="alert">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="form-success" role="status">
-            {success}
-          </div>
-        )}
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            setBusy(true);
-            setError('');
-            setSuccess('');
-            const data = new FormData(e.currentTarget);
-            const email = String(data.get('email'));
-            const password = String(data.get('password'));
-            try {
-              if (mode === 'register') {
-                await api('auth/register', {
-                  method: 'POST',
-                  body: JSON.stringify({ name: data.get('name'), email, password }),
-                });
-                setMode('login');
-                setSuccess('Your account is ready. Sign in to make yourself at home.');
-              } else {
-                await login(email, password);
-                const next = new URLSearchParams(window.location.search).get('next');
-                if (next && ['/checkout', '/cart', '/orders', '/admin'].includes(next))
-                  router.push(next);
-              }
-            } catch (e) {
-              setError(e instanceof Error ? e.message : 'Please try again.');
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          {mode === 'register' && (
-            <label>
-              Your name
-              <input
-                name="name"
-                className="input"
-                autoComplete="name"
-                required
-                maxLength={80}
-                placeholder="What should we call you?"
-              />
-            </label>
-          )}
-          <label>
-            Email address
-            <input
-              name="email"
-              type="email"
-              className="input"
-              autoComplete="email"
-              required
-              maxLength={254}
-              placeholder="you@example.com"
-            />
-          </label>
-          <label>
-            Password
-            <div className="password-field">
-              <input
-                name="password"
-                type={show ? 'text' : 'password'}
-                className="input"
-                autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
-                required
-                minLength={mode === 'register' ? 12 : 1}
-                maxLength={128}
-                placeholder={mode === 'register' ? 'At least 12 characters' : 'Your password'}
-              />
-              <button
-                type="button"
-                className="icon-button"
-                aria-label={show ? 'Hide password' : 'Show password'}
-                onClick={() => setShow(!show)}
-              >
-                {show ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </label>
-          <button className="button primary full" disabled={busy}>
-            {busy ? (
-              <LoaderCircle className="spin" size={18} />
-            ) : (
-              <>
-                {mode === 'register' ? 'Make yourself at home' : 'Sign in'} <ArrowRight size={18} />
-              </>
+        {mode === 'phone' ? (
+          <PhoneSignIn
+            onVerified={async (phone, code) => {
+              await loginWithPhone(phone, code);
+              goToNextPage();
+            }}
+          />
+        ) : (
+          <>
+            <h2>{mode === 'login' ? 'Welcome back.' : 'Hello, new friend.'}</h2>
+            <p>
+              {mode === 'login'
+                ? 'A little goodness is just a sign-in away.'
+                : 'Let’s make some room in your pantry.'}
+            </p>
+            {error && (
+              <div className="form-error" role="alert">
+                {error}
+              </div>
             )}
-          </button>
-        </form>
+            {success && (
+              <div className="form-success" role="status">
+                {success}
+              </div>
+            )}
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setBusy(true);
+                setError('');
+                setSuccess('');
+                const data = new FormData(e.currentTarget);
+                const email = String(data.get('email'));
+                const password = String(data.get('password'));
+                try {
+                  if (mode === 'register') {
+                    await api('auth/register', {
+                      method: 'POST',
+                      body: JSON.stringify({ name: data.get('name'), email, password }),
+                    });
+                    setMode('login');
+                    setSuccess('Your account is ready. Sign in to make yourself at home.');
+                  } else {
+                    await login(email, password);
+                    goToNextPage();
+                  }
+                } catch (e) {
+                  setError(e instanceof Error ? e.message : 'Please try again.');
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              {mode === 'register' && (
+                <label>
+                  Your name
+                  <input
+                    name="name"
+                    className="input"
+                    autoComplete="name"
+                    required
+                    maxLength={80}
+                    placeholder="What should we call you?"
+                  />
+                </label>
+              )}
+              <label>
+                Email address
+                <input
+                  name="email"
+                  type="email"
+                  className="input"
+                  autoComplete="email"
+                  required
+                  maxLength={254}
+                  placeholder="you@example.com"
+                />
+              </label>
+              <label>
+                Password
+                <div className="password-field">
+                  <input
+                    name="password"
+                    type={show ? 'text' : 'password'}
+                    className="input"
+                    autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+                    required
+                    minLength={mode === 'register' ? 12 : 1}
+                    maxLength={128}
+                    placeholder={mode === 'register' ? 'At least 12 characters' : 'Your password'}
+                  />
+                  <button
+                    type="button"
+                    className="icon-button"
+                    aria-label={show ? 'Hide password' : 'Show password'}
+                    onClick={() => setShow(!show)}
+                  >
+                    {show ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </label>
+              <button className="button primary full" disabled={busy}>
+                {busy ? (
+                  <LoaderCircle className="spin" size={18} />
+                ) : (
+                  <>
+                    {mode === 'register' ? 'Make yourself at home' : 'Sign in'}{' '}
+                    <ArrowRight size={18} />
+                  </>
+                )}
+              </button>
+            </form>
+          </>
+        )}
         <p className="auth-note">Your bag is saved to your account when you sign in.</p>
       </div>
     </section>
@@ -308,15 +428,21 @@ const states = [
   ['UK', 'Uttarakhand'],
   ['WB', 'West Bengal'],
 ];
-export function AddressForm({
-  initial,
-  onSaved,
-  onCancel,
-}: {
-  initial?: Address;
-  onSaved: (address: Address) => void | Promise<void>;
-  onCancel?: () => void;
-}) {
+type AddressFormProps =
+  | {
+      initial?: Address;
+      onSaved: (address: Address) => void | Promise<void>;
+      onCancel?: () => void;
+      guestCheckout?: undefined;
+    }
+  | {
+      initial?: never;
+      onSaved?: never;
+      onCancel?: never;
+      guestCheckout: (email: string, address: Omit<Address, 'id'>) => Promise<void>;
+    };
+
+export function AddressForm({ initial, onSaved, onCancel, guestCheckout }: AddressFormProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   return (
@@ -327,16 +453,24 @@ export function AddressForm({
         setBusy(true);
         setError('');
         const form = new FormData(e.currentTarget);
-        const body = Object.fromEntries(
-          ['name', 'phone', 'line1', 'line2', 'city', 'stateCode', 'postalCode'].map((key) => [
-            key,
-            form.get(key),
-          ]),
-        );
+        const body = {
+          name: String(form.get('name')),
+          phone: String(form.get('phone')),
+          line1: String(form.get('line1')),
+          line2: String(form.get('line2')),
+          city: String(form.get('city')),
+          stateCode: String(form.get('stateCode')),
+          postalCode: String(form.get('postalCode')),
+          country: 'IN' as const,
+        };
         try {
+          if (guestCheckout) {
+            await guestCheckout(String(form.get('email')), body);
+            return;
+          }
           const address = await api<Address>(`addresses${initial ? `/${initial.id}` : ''}`, {
             method: initial ? 'PUT' : 'POST',
-            body: JSON.stringify({ ...body, country: 'IN' }),
+            body: JSON.stringify(body),
           });
           await onSaved(address);
         } catch (error) {
@@ -350,6 +484,19 @@ export function AddressForm({
         <div className="form-error" role="alert">
           {error}
         </div>
+      )}
+      {guestCheckout && (
+        <label>
+          Email address
+          <input
+            className="input"
+            type="email"
+            name="email"
+            autoComplete="email"
+            maxLength={254}
+            required
+          />
+        </label>
       )}
       <div className="form-row">
         <label>
@@ -452,7 +599,7 @@ export function AddressForm({
             <LoaderCircle className="spin" size={18} />
           ) : (
             <>
-              <Check size={17} /> Save address
+              <Check size={17} /> {guestCheckout ? 'Continue to order review' : 'Save address'}
             </>
           )}
         </button>
@@ -577,7 +724,7 @@ function AddressBook() {
 }
 
 export function CartPage({ whatsappNumber }: { whatsappNumber?: string }) {
-  const { cart, ready, products, customer, busy, setQuantity } = useStore();
+  const { cart, ready, products, customer, guestCheckout, busy, setQuantity } = useStore();
   const subtotal = cart.subtotalPaise;
   const whatsapp = whatsappOrderUrl(whatsappNumber, cart.items);
   const shipping = subtotal !== null && subtotal >= 99900 ? 0 : 5900;
@@ -706,10 +853,7 @@ export function CartPage({ whatsappNumber }: { whatsappNumber?: string }) {
               <strong>{subtotal === null ? '—' : money(subtotal + shipping)}</strong>
             </div>
             {cart.canCheckout ? (
-              <Link
-                className="button primary full"
-                href={customer ? '/checkout' : '/account?next=/checkout'}
-              >
+              <Link className="button primary full" href="/checkout">
                 Continue to checkout <ArrowRight size={18} />
               </Link>
             ) : (
@@ -730,10 +874,7 @@ export function CartPage({ whatsappNumber }: { whatsappNumber?: string }) {
             <p className="summary-note">
               Preview checkout is available. Payments and delivery bookings haven’t opened yet.
             </p>
-            {!customer && (
-              <p className="summary-note">Sign in at the next step to save your bag.</p>
-            )}
-            {customer && (
+            {(customer || guestCheckout) && (
               <Link href="/checkout" className="text-link small">
                 Resume an existing checkout <ArrowUpRight size={14} />
               </Link>
@@ -767,9 +908,9 @@ export function OrderHistory() {
   const [retry, setRetry] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const { customer } = useStore();
+  const { customer, guestCheckout } = useStore();
   useEffect(() => {
-    if (!customer) return;
+    if (!customer && !guestCheckout) return;
     let alive = true;
     setLoading(true);
     setError('');
@@ -786,7 +927,7 @@ export function OrderHistory() {
     return () => {
       alive = false;
     };
-  }, [page, customer, retry]);
+  }, [page, customer, guestCheckout, retry]);
   return (
     <section className="container section">
       <div className="page-title">
@@ -876,11 +1017,11 @@ export function OrderHistory() {
   );
 }
 export function OrderDetail({ id }: { id: string }) {
-  const { customer } = useStore();
+  const { customer, guestCheckout } = useStore();
   const [order, setOrder] = useState<Order | null>(null);
   const [error, setError] = useState('');
   useEffect(() => {
-    if (!customer) return;
+    if (!customer && !guestCheckout) return;
     let alive = true;
     void api<Order>(`orders/${encodeURIComponent(id)}`)
       .then((o) => {
@@ -892,7 +1033,7 @@ export function OrderDetail({ id }: { id: string }) {
     return () => {
       alive = false;
     };
-  }, [id, customer]);
+  }, [id, customer, guestCheckout]);
   return (
     <section className="container section">
       <div className="breadcrumbs">

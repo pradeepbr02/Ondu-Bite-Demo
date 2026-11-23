@@ -4,6 +4,10 @@ import { allowedGatewayRoute, allowedMutationOrigin } from '../src/lib/gateway-p
 test('gateway limits routes and methods instead of acting as an open proxy', () => {
   assert.equal(allowedGatewayRoute('checkouts', 'POST'), true);
   assert.equal(allowedGatewayRoute('auth/login', 'POST'), true);
+  for (const path of ['auth/guest', 'auth/phone/send', 'auth/phone/verify']) {
+    assert.equal(allowedGatewayRoute(path, 'POST'), true);
+    assert.equal(allowedGatewayRoute(path, 'GET'), false);
+  }
   for (const path of [
     '../health/live',
     'https://example.com',

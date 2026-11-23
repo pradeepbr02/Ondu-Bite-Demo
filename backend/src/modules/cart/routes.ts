@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { requireCustomer } from '../identity/auth.js';
+import { requireShopper } from '../identity/auth.js';
 import { getCart, replaceCart } from './service.js';
 
-const cartBody = z
+export const cartBody = z
   .object({
     revision: z
       .number()
@@ -32,7 +32,7 @@ const cartBody = z
   .strict();
 
 export const cartRouter = Router();
-cartRouter.use(requireCustomer);
+cartRouter.use(requireShopper);
 cartRouter.get('/', async (_req, res) => res.json({ data: await getCart(res.locals.customer.id) }));
 cartRouter.put('/', async (req, res) => {
   const input = cartBody.parse(req.body);

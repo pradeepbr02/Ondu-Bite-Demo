@@ -695,6 +695,12 @@ export function OrderEditor({ orderId, onCancel, onSaved }: Props & { orderId: s
                 {order.address.city}, {order.address.stateCode} {order.address.postalCode}
                 <br />
                 {order.address.phone}
+                {order.contactEmail && (
+                  <>
+                    <br />
+                    {order.contactEmail}
+                  </>
+                )}
               </p>
             </section>
             <section>

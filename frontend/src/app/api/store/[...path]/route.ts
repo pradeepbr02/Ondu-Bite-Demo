@@ -25,9 +25,11 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
     return error(403, 'INVALID_ORIGIN', 'Request origin is not allowed.');
   const jar = await cookies();
   const token = jar.get(cookieName)?.value;
+  const sessionRoute = ['auth/login', 'auth/guest', 'auth/phone/verify'].includes(path);
   const publicRoute =
     /^(categories|products)(\/|$)/.test(path) ||
-    ['auth/login', 'auth/register', 'assistant/chat'].includes(path);
+    sessionRoute ||
+    ['auth/register', 'auth/phone/send', 'assistant/chat'].includes(path);
   if (!publicRoute && !token) return error(401, 'UNAUTHENTICATED', 'Please sign in to continue.');
   const upstream = new URL(`/api/v1/${segments.map(encodeURIComponent).join('/')}`, backend);
   upstream.search = request.nextUrl.search;
@@ -76,7 +78,7 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
       signal: AbortSignal.timeout(path === 'admin/images' ? 45000 : 15000),
     });
     const data = response.status === 204 ? null : await response.json();
-    const output = path === 'auth/login' && response.ok ? { data: data.data.customer } : data;
+    const output = sessionRoute && response.ok ? { data: data.data.customer } : data;
     const result = new NextResponse(output === null ? null : JSON.stringify(output), {
       status: response.status,
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
@@ -90,7 +92,7 @@ async function handle(request: NextRequest, context: { params: Promise<{ path: s
       const value = response.headers.get(name);
       if (value) result.headers.set(name, value);
     }
-    if (path === 'auth/login' && response.ok) {
+    if (sessionRoute && response.ok) {
       result.cookies.set(cookieName, data.data.accessToken, {
         ...cookieOptions,
         expires: new Date(data.data.expiresAt),

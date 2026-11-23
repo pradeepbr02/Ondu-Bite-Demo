@@ -158,7 +158,12 @@ adminRouter.put('/access', async (req, res) => {
     }).session(session);
     if (!activeSession) throw new AppError(401, 'UNAUTHENTICATED', 'A valid session is required.');
 
-    const target = await Customer.findOne({ email, active: true }).session(session);
+    const target = await Customer.findOne({
+      email,
+      active: true,
+      guest: { $ne: true },
+      verifiedPhone: { $exists: false },
+    }).session(session);
     if (!target)
       throw new AppError(
         404,

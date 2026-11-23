@@ -27,7 +27,14 @@ export type Product = {
   imagePresentation?: 'food' | 'package' | 'package-scene';
   imageNote?: string;
 };
-export type Customer = { id: string; name: string; email: string; role?: 'customer' | 'admin' };
+export type Customer = {
+  id: string;
+  name: string;
+  email: string;
+  role?: 'customer' | 'admin';
+  guest?: boolean;
+  phone?: string;
+};
 export type CartInput = { sku: string; quantity: number };
 export type CartItem = CartInput & {
   name?: string;
@@ -81,6 +88,7 @@ export type Order = {
   fulfillmentStatus: string;
   carrier?: string;
   trackingNumber?: string;
+  contactEmail?: string;
   address: Omit<Address, 'id'>;
   items: CartItem[];
   totals: Totals;

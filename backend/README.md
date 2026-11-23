@@ -133,6 +133,14 @@ Address input: `name`, `phone`, `line1`, optional `line2`, `city`, `stateCode`, 
 
 Shipping is **5900 paise (₹59), free when item subtotal is at least 99900 paise (₹999)**. Totals are explicitly `pricingMode: DEMO`: prices are used as listed, with no additional tax calculation. Responses include `paymentAvailable: false` and `serviceability: UNVERIFIED`. Production startup disables new demo quotes and checkout creation with `503 CHECKOUT_NOT_READY` by default.
 
+### Guest checkout and SMS sign-in
+
+Shoppers can check out with a recipient name, mobile number, email and shipping address without signing up. The storefront creates a scoped guest session, then uses the existing quote, reservation and cancellation endpoints. Guests can view their orders in the same browser while that session is active. Entering a registered email or phone at checkout does not grant access to an existing account.
+
+For mobile sign-in, create a [Twilio Verify service](https://www.twilio.com/docs/verify/api/service) with a four-digit code length and enable SMS to India. Add `TWILIO_VERIFY_SERVICE_SID`, `TWILIO_API_KEY_SID` and `TWILIO_API_KEY_SECRET` to the Render API environment and redeploy. The browser never receives these credentials. Twilio manages code expiry and SMS delivery. The API also limits requests and verification attempts by phone number.
+
+A first successful phone verification creates a phone-based customer account. Email/password accounts and guest orders remain separate from phone accounts. A delivery contact number is not treated as a verified login identity.
+
 To offer demo checkout on Render, keep `NODE_ENV=production`, set `DEMO_CHECKOUT_ENABLED=true` on the API service, and deploy. The API runs the reservation expiry loop itself whenever this flag is set, so the demo can run without a separate worker. It checks for expired holds as soon as it starts. If the API sleeps, cleanup resumes when it starts again. Each demo checkout holds stock in the configured database for up to 15 minutes under normal operation. Payments and fulfillment remain unavailable for unpaid demo orders.
 
 Using `$headers` from the login example above:

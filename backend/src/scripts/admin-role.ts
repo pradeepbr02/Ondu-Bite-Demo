@@ -11,7 +11,7 @@ try {
   await connectDatabase(readConfig().MONGODB_URI);
   await mongoose.connection.transaction(async (session) => {
     const customer = await Customer.findOneAndUpdate(
-      { email, active: true },
+      { email, active: true, guest: { $ne: true }, verifiedPhone: { $exists: false } },
       { $set: { role } },
       { session, returnDocument: 'after' },
     );

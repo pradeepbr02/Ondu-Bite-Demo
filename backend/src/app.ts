@@ -91,7 +91,7 @@ export function createApp(options: {
   app.use(express.json({ limit: '32kb' }));
   app.use('/api/v1/admin', adminRouter);
   app.use('/api/v1', catalogRouter);
-  app.use('/api/v1', createIdentityRouter());
+  app.use('/api/v1', createIdentityRouter(options.checkoutEnabled ?? true));
   app.use('/api/v1/cart', cartRouter);
   app.use('/api/v1/addresses', addressRouter);
   app.use('/api/v1/checkouts', createCheckoutRouter(options.checkoutEnabled ?? true));

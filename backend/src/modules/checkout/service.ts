@@ -13,6 +13,7 @@ import { AppError } from '../../shared/errors.js';
 import { Checkout, Order } from './models.js';
 import { Discount } from '../admin/models.js';
 import { calculateDiscount } from '../admin/discounts.js';
+import { Customer } from '../identity/models.js';
 
 export const demoShippingPolicy = { shippingFeePaise: 5900, freeShippingFromPaise: 99900 };
 type Policy = typeof demoShippingPolicy;
@@ -252,12 +253,17 @@ export async function createCheckout(
         ],
         { session },
       );
+      const guest = await Customer.findOne({ _id: customerId, guest: true })
+        .select('contactEmail')
+        .session(session)
+        .lean();
       await Order.create(
         [
           {
             orderId,
             checkoutId,
             customerId,
+            contactEmail: guest?.contactEmail,
             address: quote.address,
             items: quote.items,
             totals: quote.totals,
@@ -358,6 +364,7 @@ export function orderDto(order: NonNullable<Awaited<ReturnType<typeof loadOrderR
     fulfillmentStatus: order.fulfillmentStatus,
     carrier: order.carrier ?? '',
     trackingNumber: order.trackingNumber ?? '',
+    ...(order.contactEmail && { contactEmail: order.contactEmail }),
     address: order.address,
     items: order.items,
     totals: order.totals,

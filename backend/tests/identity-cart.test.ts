@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import request from 'supertest';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../src/app.js';
 import { connectDatabase } from '../src/db.js';
 import { Customer, Session } from '../src/modules/identity/models.js';
@@ -24,6 +24,10 @@ beforeAll(async () => {
 afterAll(async () => {
   await mongoose.disconnect();
   if (mongo) await mongo.stop();
+});
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
 });
 
 beforeEach(async () => {
@@ -73,6 +77,38 @@ async function productFixture() {
 }
 
 describe('customer authentication', () => {
+  it('creates a phone account only after an approved four-digit SMS verification', async () => {
+    const phone = '+919876543210';
+    vi.stubEnv('TWILIO_VERIFY_SERVICE_SID', 'VA' + 'a'.repeat(32));
+    vi.stubEnv('TWILIO_API_KEY_SID', 'fixture-key');
+    vi.stubEnv('TWILIO_API_KEY_SECRET', 'fixture-secret');
+    const verify = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(Response.json({ to: phone, status: 'pending' }))
+      .mockResolvedValueOnce(Response.json({ to: phone, status: 'pending' }))
+      .mockResolvedValueOnce(Response.json({ to: phone, status: 'approved' }));
+    vi.stubGlobal('fetch', verify);
+
+    await request(app).post('/api/v1/auth/phone/send').send({ phone: '9876543210' }).expect(204);
+    await request(app).post('/api/v1/auth/phone/send').send({ phone }).expect(429);
+    await request(app)
+      .post('/api/v1/auth/phone/verify')
+      .send({ phone, code: '123456' })
+      .expect(400);
+    await request(app).post('/api/v1/auth/phone/verify').send({ phone, code: '0000' }).expect(400);
+    expect(await Customer.countDocuments()).toBe(0);
+    const login = await request(app)
+      .post('/api/v1/auth/phone/verify')
+      .send({ phone, code: '0123' })
+      .expect(200);
+    expect(login.body.data.customer).toMatchObject({ phone, role: 'customer', email: '' });
+    expect(verify.mock.calls[0]?.[1]?.body?.toString()).toBe('To=%2B919876543210&Channel=sms');
+    expect(verify.mock.calls[2]?.[1]?.body?.toString()).toBe('To=%2B919876543210&Code=0123');
+    await request(app)
+      .get('/api/v1/auth/me')
+      .auth(login.body.data.accessToken, { type: 'bearer' })
+      .expect(200);
+  });
   it('normalizes email and stores a salted hash, never the password', async () => {
     const res = await signup('  Shopper@Example.COM ');
     expect(res.body.data.email).toBe('shopper@example.com');

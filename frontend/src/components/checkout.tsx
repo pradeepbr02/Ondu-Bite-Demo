@@ -14,9 +14,10 @@ import {
 import { api, ApiError } from '@/lib/api';
 import { money, weight, type Address, type Checkout, type Quote } from '@/lib/types';
 import { useStore } from './store-provider';
-import { AddressForm, AddressText, Guard, Loading, statusLabel } from './customer';
+import { AddressForm, AddressText, Loading, statusLabel } from './customer';
 
 export function CheckoutPage() {
+  const { ready, customer, guestCheckout, cart, beginGuestCheckout } = useStore();
   return (
     <section className="container section purchase-page">
       <h1 className="sr-only">Checkout</h1>
@@ -25,9 +26,37 @@ export function CheckoutPage() {
         <span>/</span>
         <span>Checkout</span>
       </div>
-      <Guard next="/checkout">
+      {!ready ? (
+        <Loading text="Getting your checkout ready…" />
+      ) : customer || guestCheckout ? (
         <CheckoutFlow />
-      </Guard>
+      ) : cart.items.length ? (
+        <div className="checkout-layout">
+          <section className="panel">
+            <h2>Guest checkout</h2>
+            <p>Enter your contact details and delivery address to continue.</p>
+            <AddressForm guestCheckout={beginGuestCheckout} />
+          </section>
+          <aside className="panel">
+            <h2>Your bag</h2>
+            {cart.items.map((item) => (
+              <p key={item.sku}>
+                {item.name ?? item.sku} × {item.quantity}
+              </p>
+            ))}
+            <Link href="/account?next=%2Fcheckout" className="text-link">
+              Already have an account? Sign in <ArrowRight size={16} />
+            </Link>
+          </aside>
+        </div>
+      ) : (
+        <div className="empty-state">
+          <h2>Your bag is empty</h2>
+          <Link href="/shop" className="button primary">
+            Shop products
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

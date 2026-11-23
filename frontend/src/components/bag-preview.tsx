@@ -15,7 +15,7 @@ export function BagPreview({
   whatsappNumber?: string;
   onOpen: () => void;
 }) {
-  const { cart, customer, products, ready, busy, notice, setQuantity } = useStore();
+  const { cart, products, ready, busy, notice, setQuantity } = useStore();
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLAnchorElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
@@ -204,11 +204,7 @@ export function BagPreview({
                   <strong>{subtotal === null ? 'Unavailable' : money(subtotal)}</strong>
                 </div>
                 {cart.canCheckout ? (
-                  <Link
-                    href={customer ? '/checkout' : '/account?next=/checkout'}
-                    className="button primary full"
-                    onClick={close}
-                  >
+                  <Link href="/checkout" className="button primary full" onClick={close}>
                     Continue to checkout <ArrowRight size={16} />
                   </Link>
                 ) : (

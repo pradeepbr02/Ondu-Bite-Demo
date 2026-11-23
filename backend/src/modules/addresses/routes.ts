@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { requireCustomer } from '../identity/auth.js';
+import { requireShopper } from '../identity/auth.js';
 import { Address } from './models.js';
 import { AppError } from '../../shared/errors.js';
 
@@ -83,7 +83,7 @@ function dto(a: {
 }
 
 export const addressRouter = Router();
-addressRouter.use(requireCustomer);
+addressRouter.use(requireShopper);
 addressRouter.get('/', async (_req, res) => {
   const addresses = await Address.find({ customerId: res.locals.customer.id })
     .sort({ _id: 1 })

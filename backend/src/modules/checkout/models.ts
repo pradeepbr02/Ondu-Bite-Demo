@@ -60,6 +60,7 @@ const orderSchema = new Schema(
     },
     trackingNumber: { type: String, default: '' },
     carrier: { type: String, default: '' },
+    contactEmail: { type: String },
     address: { type: new Schema(addressFields, { _id: false }), required: true },
     items: {
       type: [

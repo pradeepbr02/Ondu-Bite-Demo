@@ -105,6 +105,42 @@ async function expire(id: string) {
   await Reservation.updateOne({ checkoutId: id }, { expiresAt });
 }
 
+it('allows a guest to check out with their existing email without reaching the account’s data', async () => {
+  const member = await customer();
+  const registered = await Customer.findById(member.customerId).orFail();
+  const response = await request(app)
+    .post('/api/v1/auth/guest')
+    .send({ email: registered.email, address, items })
+    .expect(201);
+  const profile = response.body.data.customer;
+  expect(profile).toMatchObject({ email: registered.email, guest: true, role: 'customer' });
+  expect(profile.id).not.toBe(member.customerId);
+
+  const token = response.body.data.accessToken;
+  const addresses = await request(app)
+    .get('/api/v1/addresses')
+    .auth(token, { type: 'bearer' })
+    .expect(200);
+  expect(addresses.body.data).toHaveLength(1);
+  const guest = { token, customerId: profile.id, addressId: addresses.body.data[0].id };
+  expect(guest.addressId).not.toBe(member.addressId);
+  const checkout = await create(guest, await quote(guest)).expect(201);
+  const orderId = checkout.body.data.orderId;
+  const order = await request(app)
+    .get(`/api/v1/orders/${orderId}`)
+    .auth(token, { type: 'bearer' })
+    .expect(200);
+  expect(order.body.data).toMatchObject({
+    contactEmail: registered.email,
+    paymentStatus: 'UNPAID',
+  });
+  await request(app)
+    .get(`/api/v1/orders/${orderId}`)
+    .auth(member.token, { type: 'bearer' })
+    .expect(404);
+  await request(app).get('/api/v1/admin/me').auth(token, { type: 'bearer' }).expect(403);
+});
+
 describe('owned addresses', () => {
   it('supports CRUD while hiding other customers addresses', async () => {
     const first = await customer();
